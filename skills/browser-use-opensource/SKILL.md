@@ -33,15 +33,35 @@ Domain skills are off by default. Set `BH_DOMAIN_SKILLS=1` to enable them; see t
 
 **If `BH_DOMAIN_SKILLS=1` and the task is site-specific, read every file in the matching `$BH_AGENT_WORKSPACE/domain-skills/<site>/` directory before inventing an approach.**
 
-## Codex on Windows
+## Windows (Codex & Antigravity)
 
-Use the installed CLI through PowerShell stdin, Use this terminal flow instead of a separate browser-use MCP server. The Bash heredoc examples below should be translated to PowerShell here-strings:
+Use the installed `browser-use` CLI through standard input instead of a separate browser-use MCP server.
+
+### Codex on Windows
+
+Translate Bash heredoc examples to PowerShell here-strings:
 
 ```powershell
 @'
 print(cdp("Browser.getVersion")["product"])
 '@ | browser-use
 ```
+
+### Antigravity on Windows
+
+In Antigravity's Windows PowerShell `run_command` environment, direct PowerShell pipelines (`@' ... '@ | browser-use`) can prepend a UTF-8 BOM (`U+FEFF`) when UTF-8 output encoding is active, causing `SyntaxError: invalid non-printable character U+FEFF`. To avoid BOM injection on Windows, place the pipe inside `cmd.exe /c` and use `ensure_ascii=True` for JSON output:
+
+```powershell
+cmd.exe /c 'echo print(cdp("Browser.getVersion")["product"]) | browser-use'
+```
+
+For multi-statement inspection (such as reading `page_info()` and open tabs):
+
+```powershell
+cmd.exe /c 'echo import json; print(json.dumps({"page_info": page_info(), "pages": [{"title": t.get("title"), "url": t.get("url"), "attached": t.get("attached")} for t in cdp("Target.getTargets").get("targetInfos", []) if t.get("type") == "page"]}, ensure_ascii=True)) | browser-use'
+```
+
+### Host Session & Sandbox Rules
 
 The user's Chrome and shared daemon run in the host session. If the terminal sandbox cannot reach localhost (for example, `CODEX_SANDBOX_NETWORK_DISABLED=1`), use the execution tool's normal permission mechanism to request host execution. Do not unset sandbox markers or weaken sandbox settings. A failed daemon check inside the sandbox alone does not prove the host daemon is stopped. Reuse the default shared daemon; do not restart it or remove its runtime files based only on sandbox connectivity failures.
 

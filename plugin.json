@@ -1,0 +1,10 @@
+{
+  "name": "browser-use-opensource",
+  "displayName": "Browser Use OpenSource",
+  "version": "1.0.2",
+  "description": "Control local Chrome using the existing browser-use CLI and skill.",
+  "author": {
+    "name": "HadesScience"
+  },
+  "repository": "https://github.com/HadesScience/browser-use-opensource-plugin"
+}
